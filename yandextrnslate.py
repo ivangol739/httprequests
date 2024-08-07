@@ -26,4 +26,4 @@ def translate_word(word):
 
 if __name__ == "__main__":
 	word = "машина"
-	print(translate_word(word))
+	translate_word(word)
