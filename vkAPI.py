@@ -1,22 +1,39 @@
 import requests
 import os
 from dotenv import load_dotenv
-
+from pprint import pprint
 
 class VK:
-	def __init__(self, access_token, user_id, version="5.131"):
+	API_BASE_URL = 'https://api.vk.com/method'
+	def __init__(self, access_token, user_id):
 		self.token = access_token
 		self.user_id = user_id
-		self.version = version
-		self.params = {
+
+	def get_common_params(self):
+		return {
 			"access_token": self.token,
-			"v": self.version,
+			"v": "5.131",
 		}
 
+	def _build_url(self, api_method):
+		return f"{self.API_BASE_URL}/{api_method}"
+
 	def user_info(self):
-		url = 'https://api.vk.com/method/users.get'
-		params = {"user_id": self.user_id}
-		response = requests.get(url, params={**self.params, **params})
+		params = self.get_common_params()
+		params.update({"user_id": self.user_id})
+		response = requests.get(self._build_url("users.get"), params=params)
+		return response.json()
+
+	def get_status(self):
+		params = self.get_common_params()
+		params.update({"user_id": self.user_id})
+		response = requests.get(self._build_url("status.get"), params=params)
+		return response.json().get("response", {}).get("text")
+
+	def get_profile_photos(self):
+		params = self.get_common_params()
+		params.update({"user_id": self.user_id, "album_id": "profile"})
+		response = requests.get(self._build_url("photos.get"), params=params)
 		return response.json()
 
 
@@ -26,3 +43,6 @@ if __name__ == "__main__":
 	user_id = "1"
 	vk = VK(vk_token, user_id)
 	print(vk.user_info())
+	print(vk.get_status())
+	pprint(vk.get_profile_photos())
+
